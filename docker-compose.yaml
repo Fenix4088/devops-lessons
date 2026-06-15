@@ -67,7 +67,7 @@ services:
         BUILD_MODE: ${BUILD_MODE}
         VITE_NAME: ${VITE_NAME}
     ports:
-      - "8080:80"
+      - "${FE_HOST_PORT}:${FE_PORT}"
     depends_on:
       backend:
         condition: service_healthy
