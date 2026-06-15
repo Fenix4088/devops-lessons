@@ -1,0 +1,58 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"                     # открыли БД на хост — для DBeaver/psql
+    volumes:
+      - pgdata-dev:/var/lib/postgresql/data
+    networks:
+      - internal
+ 
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev        # ← отдельный Dockerfile
+    command: npm run start:dev
+    volumes:
+      - ./backend:/app                  # bind mount — код хоста виден в контейнере
+      - /app/node_modules               # анонимный volume — защищаем node_modules
+    environment:
+      DB_HOST: db
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      NODE_ENV: development
+    ports:
+      - "${BACKEND_PORT:-8090}:3001"
+    networks:
+      - internal
+      - public
+    depends_on:
+      - db
+ 
+  frontend:
+    build:
+      context: ./frontend
+      # dockerfile: Dockerfile.dev
+      args:
+        - BUILD_MODE=${BUILD_MODE}
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "${FRONTEND_PORT:-8080}:5173"   # Vite 
+    networks:
+      - public
+    depends_on:
+      - backend
+ 
+volumes:
+  pgdata-dev:                           # отдельный том, не пересекается с прод-БД
+ 
+networks:
+  internal:
+  public:
