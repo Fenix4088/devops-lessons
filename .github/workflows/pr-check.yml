@@ -33,7 +33,6 @@ jobs:
       fail-fast: false
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
       # -- Built-in setup-node caching (SIMPLER)
     
         # with:
@@ -49,6 +48,12 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('backend/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
 
       - name: Install dependencies
         working-directory: backend
