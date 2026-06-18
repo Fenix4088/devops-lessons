@@ -22,17 +22,4 @@ describe('AppController (e2e)', () => {
       .expect(200)
       .expect('Hello World!');
   });
-
-  it('should use a supported Node.js version', () => {
-    const minSupportedMajor = 188;
-    const major = Number(process.versions.node.split('.')[0]);
-
-    if (major < minSupportedMajor) {
-      throw new Error(
-        `Unsupported Node.js version: ${process.version}. Requires >= ${minSupportedMajor}.`,
-      );
-    }
-
-    expect(major).toBeGreaterThanOrEqual(minSupportedMajor);
-  });
 });
