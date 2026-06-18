@@ -24,3 +24,43 @@ jobs:
             git pull origin main
             cd /var/www/lessons
             docker compose up --build -d
+  notify:
+    needs: [checks, deploy]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify about deployment
+        run: |
+          CHECKS_STATUS="${{ needs.checks.result }}"
+          DEPLOY_STATUS="${{ needs.deploy.result }}"
+
+          if [ "$CHECKS_STATUS" != "success" ]; then
+            TEXT="❌ Checks failed
+          ${{ github.repository }} @ ${{ github.ref_name }}
+
+          Backend: ${{ needs.checks.outputs.backend_result }}
+          Tests: ${{ needs.checks.outputs.test_result }}
+          Frontend: ${{ needs.checks.outputs.frontend_result }}
+
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          elif [ "$DEPLOY_STATUS" = "success" ]; then
+            TEXT="✅ Deploy successful
+          ${{ github.repository }} @ ${{ github.ref_name }}
+
+          Backend: ${{ needs.checks.outputs.backend_result }}
+          Tests: ${{ needs.checks.outputs.test_result }}
+          Frontend: ${{ needs.checks.outputs.frontend_result }}"
+          else
+            TEXT="❌ Deploy failed
+          ${{ github.repository }} @ ${{ github.ref_name }}
+
+          Backend: ${{ needs.checks.outputs.backend_result }}
+          Tests: ${{ needs.checks.outputs.test_result }}
+          Frontend: ${{ needs.checks.outputs.frontend_result }}
+
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          fi
+
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+            -d "chat_id=${{ secrets.TELEGRAM_CHAT_ID }}" \
+            --data-urlencode "text=$TEXT"

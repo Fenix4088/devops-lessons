@@ -4,6 +4,13 @@ on:
   pull_request:
     branches: [main]
   workflow_call:
+    outputs:
+      backend_result:
+        value: ${{ jobs.report.outputs.backend_result }}
+      test_result:
+        value: ${{ jobs.report.outputs.test_result }}
+      frontend_result:
+        value: ${{ jobs.report.outputs.frontend_result }}
  
 jobs:
   backend:
@@ -85,3 +92,23 @@ jobs:
       - name: Build frontend
         working-directory: frontend
         run: npm run build:production
+
+  report:
+    runs-on: ubuntu-latest
+    needs: [backend, test, frontend]
+    if: always()
+    outputs:
+      backend_result: ${{ steps.results.outputs.backend_result }}
+      test_result: ${{ steps.results.outputs.test_result }}
+      frontend_result: ${{ steps.results.outputs.frontend_result }}
+    steps:
+      - name: Collect check results
+        id: results
+        run: |
+          echo "backend_result=${{ needs.backend.result }}" >> "$GITHUB_OUTPUT"
+          echo "test_result=${{ needs.test.result }}" >> "$GITHUB_OUTPUT"
+          echo "frontend_result=${{ needs.frontend.result }}" >> "$GITHUB_OUTPUT"
+
+      - name: Fail if checks failed
+        if: needs.backend.result != 'success' || needs.test.result != 'success' || needs.frontend.result != 'success'
+        run: exit 1
