@@ -2,7 +2,7 @@ name: week-2-cluster
 # db
 services:
   db: 
-    image: postgres:16-alpine
+    image: ${DOCKER_IMAGE_DB}
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
