@@ -22,6 +22,8 @@ jobs:
           IMAGE_LATEST: latest
         run: |
           docker build \
+          --build-arg BUILD_MODE=${{ vars.BUILD_MODE }} \
+          --build-arg VITE_NAME=${{ vars.VITE_NAME }} \
           -t ${{ secrets.DOCKER_USER }}/todo-front:${IMAGE_SHA} \
           -t ${{ secrets.DOCKER_USER }}/todo-front:${IMAGE_LATEST} \
           ./frontend
