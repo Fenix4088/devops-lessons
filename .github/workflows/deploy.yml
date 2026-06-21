@@ -23,11 +23,11 @@ jobs:
         run: |
           docker build -t ${{ secrets.DOCKER_USER }}/todo-front:${IMAGE_SHA} \
           -t ${{ secrets.DOCKER_USER }}/todo-front:${IMAGE_LATEST} \ 
-          .
+          ./frontend
 
           docker build -t ${{ secrets.DOCKER_USER }}/todo-back:${IMAGE_SHA} \
           -t ${{ secrets.DOCKER_USER }}/todo-back:${IMAGE_LATEST} \ 
-          .
+          ./backend
 
           docker push ${{ secrets.DOCKER_USER }}/todo-front:${IMAGE_SHA}
           docker push ${{ secrets.DOCKER_USER }}/todo-front:${IMAGE_LATEST}
