@@ -1,8 +1,11 @@
 import { Controller, Get } from '@nestjs/common';
+import { AppService } from './app.service';
 import { pool } from './db';
 
 @Controller('tasks')
 export class AppController {
+  constructor(private readonly appService: AppService) {}
+
   @Get()
   async getTasks(): Promise<{ id: number; title: string; done: boolean }[]> {
     const { rows } = await pool.query(
@@ -13,6 +16,6 @@ export class AppController {
 
   @Get('hello')
   getHello(): string {
-    return 'Hello World!';
+    return this.appService.getHello();
   }
 }
