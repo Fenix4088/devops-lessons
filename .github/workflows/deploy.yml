@@ -8,30 +8,57 @@ jobs:
   checks:
     uses: ./.github/workflows/pr-check.yml
  
-  deploy:
-    needs: checks
+  build: 
+    needs: [checks]
     runs-on: ubuntu-latest
- 
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd /var/www/devops-lessons
-            git pull origin main
-            cd /var/www/lessons
-            docker compose up --build -d
-  notify:
-    if: always()
-    needs: [checks, deploy]
-    uses: ./.github/workflows/notify.yml
-    with:
-      checks_status: ${{ needs.checks.result }}
-      deploy_status: ${{ needs.deploy.result }}
-      backend_result: ${{ needs.checks.outputs.backend_result }}
-      test_result: ${{ needs.checks.outputs.test_result }}
-      frontend_result: ${{ needs.checks.outputs.frontend_result }}
-    secrets: inherit
+      - uses: actions/checkout@v4
+      - name: Login to DockerHub
+        run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASS }}
+
+      - name: Build and push frontend and backend images
+        env:
+          IMAGE_SHA: sha-${{ github.sha }}
+          IMAGE_LATEST: latest
+        run: |
+          docker build -t ${{ secrets.DOCKER_USER }}/todo-front:${IMAGE_SHA} \
+          -t ${{ secrets.DOCKER_USER }}/todo-front:${IMAGE_LATEST} \ 
+          .
+
+          docker build -t ${{ secrets.DOCKER_USER }}/todo-back:${IMAGE_SHA} \
+          -t ${{ secrets.DOCKER_USER }}/todo-back:${IMAGE_LATEST} \ 
+          .
+
+          docker push ${{ secrets.DOCKER_USER }}/todo-front:${IMAGE_SHA}
+          docker push ${{ secrets.DOCKER_USER }}/todo-front:${IMAGE_LATEST}
+          docker push ${{ secrets.DOCKER_USER }}/todo-back:${IMAGE_SHA}
+          docker push ${{ secrets.DOCKER_USER }}/todo-back:${IMAGE_LATEST}
+
+
+  # deploy:
+  #   needs: checks
+  #   runs-on: ubuntu-latest
+ 
+  #   steps:
+  #     - name: Deploy via SSH
+  #       uses: appleboy/ssh-action@v1.0.3
+  #       with:
+  #         host: ${{ secrets.SSH_HOST }}
+  #         username: ${{ secrets.SSH_USER }}
+  #         key: ${{ secrets.SSH_PRIVATE_KEY }}
+  #         script: |
+  #           cd /var/www/devops-lessons
+  #           git pull origin main
+  #           cd /var/www/lessons
+  #           docker compose up --build -d
+  # notify:
+  #   if: always()
+  #   needs: [checks, deploy]
+  #   uses: ./.github/workflows/notify.yml
+  #   with:
+  #     checks_status: ${{ needs.checks.result }}
+  #     deploy_status: ${{ needs.deploy.result }}
+  #     backend_result: ${{ needs.checks.outputs.backend_result }}
+  #     test_result: ${{ needs.checks.outputs.test_result }}
+  #     frontend_result: ${{ needs.checks.outputs.frontend_result }}
+  #   secrets: inherit
