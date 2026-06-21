@@ -37,10 +37,11 @@ jobs:
           docker push ${{ secrets.DOCKER_USER }}/todo-front:${IMAGE_LATEST}
           docker push ${{ secrets.DOCKER_USER }}/todo-back:${IMAGE_SHA}
           docker push ${{ secrets.DOCKER_USER }}/todo-back:${IMAGE_LATEST}
-
+          # Передаём SHA образов в output, чтобы не дублировать в deploy
+          echo "image_sha=$IMAGE_SHA" >> "$GITHUB_OUTPUT"
 
   # deploy:
-  #   needs: checks
+  #   needs: [build]
   #   runs-on: ubuntu-latest
  
   #   steps:
@@ -55,14 +56,33 @@ jobs:
   #           git pull origin main
   #           cd /var/www/lessons
   #           docker compose up --build -d
-  # notify:
-  #   if: always()
-  #   needs: [checks, deploy]
-  #   uses: ./.github/workflows/notify.yml
-  #   with:
-  #     checks_status: ${{ needs.checks.result }}
-  #     deploy_status: ${{ needs.deploy.result }}
-  #     backend_result: ${{ needs.checks.outputs.backend_result }}
-  #     test_result: ${{ needs.checks.outputs.test_result }}
-  #     frontend_result: ${{ needs.checks.outputs.frontend_result }}
-  #   secrets: inherit
+
+  deploy:
+    needs: [build]
+    runs-on: ubuntu-latest
+ 
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/devops-lessons
+            # Берём имя образа из output предыдущего job'а — не дублируем
+            sed -i "s|DOCKER_IMAGE_FE=.*|DOCKER_IMAGE_FE=${{ needs.build.outputs.image_sha }}|" .env
+            sed -i "s|DOCKER_IMAGE_BE=.*|DOCKER_IMAGE_BE=${{ needs.build.outputs.image_sha }}|" .env
+            docker compose up -d --no-deps backend frontend
+
+  notify:
+    if: always()
+    needs: [checks, deploy, build]
+    uses: ./.github/workflows/notify.yml
+    with:
+      checks_status: ${{ needs.checks.result }}
+      deploy_status: ${{ needs.deploy.result }}
+      backend_result: ${{ needs.checks.outputs.backend_result }}
+      test_result: ${{ needs.checks.outputs.test_result }}
+      frontend_result: ${{ needs.checks.outputs.frontend_result }}
+    secrets: inherit
