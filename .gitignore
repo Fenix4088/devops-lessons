@@ -1,0 +1,55 @@
+# dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# build outputs
+dist/
+build/
+coverage/
+backend/dist/
+backend/coverage/
+frontend/dist/
+frontend/build/
+frontend/coverage/
+
+# environment files
+.env
+.env.*
+!.env.example
+
+# logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# caches
+.cache/
+.parcel-cache/
+.vite/
+.eslintcache
+*.tsbuildinfo
+
+# test/runtime
+.nyc_output/
+tmp/
+temp/
+
+# docker/local data
+.docker/
+docker-data/
+pgdata/
+postgres-data/
+
+# editor/system
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# OS/editor swap files
+*.swp
+*.swo
