@@ -21,12 +21,12 @@ jobs:
           IMAGE_SHA: sha-${{ github.sha }}
           IMAGE_LATEST: latest
         run: |
-          docker build -t ${{ secrets.DOCKER_USER }}/todo-front:${IMAGE_SHA} \
+          docker build -t ${{ secrets.DOCKER_USER }}/todo-front:${IMAGE_SHA} ./frontend \
           -t ${{ secrets.DOCKER_USER }}/todo-front:${IMAGE_LATEST} \ 
           ./frontend
 
-          docker build -t ${{ secrets.DOCKER_USER }}/todo-back:${IMAGE_SHA} \
-          -t ${{ secrets.DOCKER_USER }}/todo-back:${IMAGE_LATEST} \ 
+          docker build -t ${{ secrets.DOCKER_USER }}/todo-back:${IMAGE_SHA} ./backend \
+          -t ${{ secrets.DOCKER_USER }}/todo-back:${IMAGE_LATEST} ./backend
           ./backend
 
           docker push ${{ secrets.DOCKER_USER }}/todo-front:${IMAGE_SHA}
