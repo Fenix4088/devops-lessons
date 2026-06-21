@@ -1,16 +1,23 @@
 name: Notify
  
 on:
-  pull_request:
-    branches: [main]
   workflow_call:
-    outputs:
+    inputs:
+      checks_status:
+        required: true
+        type: string
+      deploy_status:
+        required: true
+        type: string
       backend_result:
-        value: ${{ jobs.report.outputs.backend_result }}
+        required: true
+        type: string
       test_result:
-        value: ${{ jobs.report.outputs.test_result }}
+        required: true
+        type: string
       frontend_result:
-        value: ${{ jobs.report.outputs.frontend_result }}
+        required: true
+        type: string
 jobs:
   notify:
     if: always()
@@ -18,32 +25,32 @@ jobs:
     steps:
       - name: Notify about deployment
         run: |
-          CHECKS_STATUS="${{ needs.checks.result }}"
-          DEPLOY_STATUS="${{ needs.deploy.result }}"
+          CHECKS_STATUS="${{ inputs.checks_status }}"
+          DEPLOY_STATUS="${{ inputs.deploy_status }}"
 
           if [ "$CHECKS_STATUS" != "success" ]; then
             TEXT="❌ Checks failed
           ${{ github.repository }} @ ${{ github.ref_name }}
 
-          Backend: ${{ needs.checks.outputs.backend_result }}
-          Tests: ${{ needs.checks.outputs.test_result }}
-          Frontend: ${{ needs.checks.outputs.frontend_result }}
+          Backend: ${{ inputs.backend_result }}
+          Tests: ${{ inputs.test_result }}
+          Frontend: ${{ inputs.frontend_result }}
 
           Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           elif [ "$DEPLOY_STATUS" = "success" ]; then
             TEXT="✅ Deploy successful
           ${{ github.repository }} @ ${{ github.ref_name }}
 
-          Backend: ${{ needs.checks.outputs.backend_result }}
-          Tests: ${{ needs.checks.outputs.test_result }}
-          Frontend: ${{ needs.checks.outputs.frontend_result }}"
+          Backend: ${{ inputs.backend_result }}
+          Tests: ${{ inputs.test_result }}
+          Frontend: ${{ inputs.frontend_result }}"
           else
             TEXT="❌ Deploy failed
           ${{ github.repository }} @ ${{ github.ref_name }}
 
-          Backend: ${{ needs.checks.outputs.backend_result }}
-          Tests: ${{ needs.checks.outputs.test_result }}
-          Frontend: ${{ needs.checks.outputs.frontend_result }}
+          Backend: ${{ inputs.backend_result }}
+          Tests: ${{ inputs.test_result }}
+          Frontend: ${{ inputs.frontend_result }}
 
           Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           fi

@@ -25,5 +25,13 @@ jobs:
             cd /var/www/lessons
             docker compose up --build -d
   notify:
+    if: always()
     needs: [checks, deploy]
     uses: ./.github/workflows/notify.yml
+    with:
+      checks_status: ${{ needs.checks.result }}
+      deploy_status: ${{ needs.deploy.result }}
+      backend_result: ${{ needs.checks.outputs.backend_result }}
+      test_result: ${{ needs.checks.outputs.test_result }}
+      frontend_result: ${{ needs.checks.outputs.frontend_result }}
+    secrets: inherit
