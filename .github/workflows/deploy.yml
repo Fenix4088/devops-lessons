@@ -11,12 +11,16 @@ jobs:
   build: 
     needs: [checks]
     runs-on: ubuntu-latest
+    outputs:
+    # експортируем переменную
+      image_sha: ${{ steps.build-push.outputs.image_sha }}
     steps:
       - uses: actions/checkout@v4
       - name: Login to DockerHub
         run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASS }}
 
       - name: Build and push frontend and backend images
+        id: build-push
         env:
           IMAGE_SHA: sha-${{ github.sha }}
           IMAGE_LATEST: latest

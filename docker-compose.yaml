@@ -1,4 +1,4 @@
-name: week-2-cluster
+name: devsops-lessons
 # db
 services:
   db: 
