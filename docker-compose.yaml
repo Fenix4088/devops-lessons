@@ -35,8 +35,8 @@ services:
     
   # main backend
   backend:
-    build: ./backend
-    # restart: always
+    image: ${DOCKER_IMAGE_BE}
+    restart: always
     environment:
       PORT: ${PORT}
       DB_HOST: db
@@ -61,11 +61,7 @@ services:
       - public
 
   frontend:
-    build:
-      context: ./frontend
-      args:
-        BUILD_MODE: ${BUILD_MODE}
-        VITE_NAME: ${VITE_NAME}
+    image: ${DOCKER_IMAGE_FE}
     ports:
       - "${FE_HOST_PORT}:${FE_PORT}"
     depends_on:
