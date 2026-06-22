@@ -28,19 +28,19 @@ jobs:
           docker build \
           --build-arg BUILD_MODE=${{ vars.BUILD_MODE }} \
           --build-arg VITE_NAME=${{ vars.VITE_NAME }} \
-          -t ${{ vars.DOCKER_USER }}/todo-front:${IMAGE_SHA} \
-          -t ${{ vars.DOCKER_USER }}/todo-front:${IMAGE_LATEST} \
+          -t ${{ vars.DOCKER_USER }}/lessons-todo-front:${IMAGE_SHA} \
+          -t ${{ vars.DOCKER_USER }}/lessons-todo-front:${IMAGE_LATEST} \
           ./frontend
 
           docker build \
-          -t ${{ vars.DOCKER_USER }}/todo-back:${IMAGE_SHA} \
-          -t ${{ vars.DOCKER_USER }}/todo-back:${IMAGE_LATEST} \
+          -t ${{ vars.DOCKER_USER }}/lessons-todo-back:${IMAGE_SHA} \
+          -t ${{ vars.DOCKER_USER }}/lessons-todo-back:${IMAGE_LATEST} \
           ./backend
 
-          docker push ${{ vars.DOCKER_USER }}/todo-front:${IMAGE_SHA}
-          docker push ${{ vars.DOCKER_USER }}/todo-front:${IMAGE_LATEST}
-          docker push ${{ vars.DOCKER_USER }}/todo-back:${IMAGE_SHA}
-          docker push ${{ vars.DOCKER_USER }}/todo-back:${IMAGE_LATEST}
+          docker push ${{ vars.DOCKER_USER }}/lessons-todo-front:${IMAGE_SHA}
+          docker push ${{ vars.DOCKER_USER }}/lessons-todo-front:${IMAGE_LATEST}
+          docker push ${{ vars.DOCKER_USER }}/lessons-todo-back:${IMAGE_SHA}
+          docker push ${{ vars.DOCKER_USER }}/lessons-todo-back:${IMAGE_LATEST}
           # Передаём SHA образов в output, чтобы не дублировать в deploy
           echo "image_sha=$IMAGE_SHA" >> "$GITHUB_OUTPUT"
 
@@ -75,8 +75,8 @@ jobs:
           script: |
             cd /var/www/devops-lessons
             # Берём имя образа из output предыдущего job'а — не дублируем
-            sed -i "s|^DOCKER_IMAGE_FE=.*|DOCKER_IMAGE_FE=${{ vars.DOCKER_USER }}/todo-front:${{ needs.build.outputs.image_sha }}|" .env
-            sed -i "s|^DOCKER_IMAGE_BE=.*|DOCKER_IMAGE_BE=${{ vars.DOCKER_USER }}/todo-back:${{ needs.build.outputs.image_sha }}|" .env
+            sed -i "s|^DOCKER_IMAGE_FE=.*|DOCKER_IMAGE_FE=${{ vars.DOCKER_USER }}/lessons-todo-front:${{ needs.build.outputs.image_sha }}|" .env
+            sed -i "s|^DOCKER_IMAGE_BE=.*|DOCKER_IMAGE_BE=${{ vars.DOCKER_USER }}/lessons-todo-back:${{ needs.build.outputs.image_sha }}|" .env
             docker compose up -d --no-deps backend frontend
 
   notify:
