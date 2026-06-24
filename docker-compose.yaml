@@ -24,7 +24,7 @@ services:
   dbeaver:
     image: dbeaver/cloudbeaver:26.0.5
     ports:
-      - "${DB_CLIENT_HOST_PORT}:${DB_CLIENT_PORT}"
+      - "127.0.0.1:${DB_CLIENT_HOST_PORT}:${DB_CLIENT_PORT}"
     volumes:
       - cdbeaver:/opt/cloudbeaver/workspace
     depends_on:
@@ -45,7 +45,7 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
     ports:
-      - "${HOST_PORT}:${PORT}"
+      - "127.0.0.1:${HOST_PORT}:${PORT}"
     healthcheck:
       test:
         ["CMD-SHELL", "wget -qO- http://localhost:$PORT/api/health | grep -q '\"status\":\"ok\"' || exit 1"]
@@ -63,7 +63,9 @@ services:
   frontend:
     image: ${DOCKER_IMAGE_FE}
     ports:
-      - "${FE_HOST_PORT}:${FE_PORT}"
+    # Докер когда мы мапим порнты с хоста на арпт внутри контейнера, докер создает запись в IP tables минуя фаервол пропуская запросы снаружи.
+    # поэтому мы явно указываем 127.0.0.1 это означает что доступ к этому порту мы имеем только с локальной машины, а не снаружи. Все запросы снаружи пойдут через nginx который будет проксировать запросы на фронтенд.
+      - "127.0.0.1:${FE_HOST_PORT}:${FE_PORT}"
     depends_on:
       backend:
         condition: service_healthy
@@ -103,6 +105,24 @@ services:
       - public
 
 
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yaml
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - public
+
+
 networks:
   internal:
     # no access from outside
@@ -113,3 +133,4 @@ volumes:
   pgdata:
   cdbeaver:
   prometheus_data:
+  grafana_data:
