@@ -159,7 +159,7 @@ services:
       - portainer_data:/data
     restart: unless-stopped
     networks:
-      - app-network
+      - public
 
 
 networks:
