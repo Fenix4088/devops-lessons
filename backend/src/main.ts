@@ -5,6 +5,6 @@ import { initDb } from './db';
 async function bootstrap() {
   await initDb();
   const app = await NestFactory.create(AppModule);
-  await app.listen(process.env.PORT ?? 3001);
+  await app.listen(process.env.PORT ?? 3001, '0.0.0.0');
 }
 bootstrap();
