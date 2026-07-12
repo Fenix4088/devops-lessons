@@ -12,19 +12,15 @@ spec:
       labels:
         app: backend-api
     spec:
+      imagePullSecrets:
+        - name: dockerhub-cred
       containers:
       - name: backend-api
         image: fenix4088/lessons-todo-back:latest
         ports:
           - containerPort: 3005
-        env:
-          - name: DB_HOST
-            value: "postgres"
-          - name: DB_PORT
-            value: "5432"
-          - name: DB_NAME
-            value: "shop"
-          - name: DB_USER
-            value: "admin"
-          - name: DB_PASSWORD
-            value: "supersecret"
+        envFrom:
+          - configMapRef:
+              name: backend-config
+          - secretRef:
+              name: backend-secret
