@@ -16,7 +16,7 @@ spec:
         - name: dockerhub-cred
       containers:
       - name: backend-api
-        image: fenix4088/lessons-todo-back:latest
+        image: ${IMAGE}
         ports:
           - containerPort: 3005
         envFrom:
