@@ -57,7 +57,7 @@ jobs:
  
       - name: Deploy to k3s
         run: |
-          kubectl set image deployment/backend-api backend-api=${{ needs.build.outputs.image_sha }}
+          kubectl set image deployment/backend-api backend-api=${{ vars.DOCKER_USER }}/lessons-todo-back:${{ needs.build.outputs.image_sha }}
           kubectl rollout status deployment/backend-api --timeout=120s
 
   notify:
