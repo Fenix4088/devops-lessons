@@ -1,7 +1,8 @@
-name: Deploy
+name: Deploy k8s
  
 on:
-  workflow_dispatch:
+  push:
+    branches: [main]
  
 jobs:
   checks:
@@ -49,30 +50,15 @@ jobs:
     runs-on: ubuntu-latest
  
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Copy compose and monitoring configs into server
-        uses: appleboy/scp-action@v0.1.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "docker-compose.yaml,monitoring"
-          target: "/var/www/devops-lessons"
-
-
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd /var/www/devops-lessons
-            # Берём имя образа из output предыдущего job'а — не дублируем
-            sed -i "s|^DOCKER_IMAGE_FE=.*|DOCKER_IMAGE_FE=${{ vars.DOCKER_USER }}/lessons-todo-front:${{ needs.build.outputs.image_sha }}|" .env
-            sed -i "s|^DOCKER_IMAGE_BE=.*|DOCKER_IMAGE_BE=${{ vars.DOCKER_USER }}/lessons-todo-back:${{ needs.build.outputs.image_sha }}|" .env
-            docker compose up -d --no-deps backend frontend
+      - name: Configure kubectl
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ~/.kube/k3s-config
+ 
+      - name: Deploy to k3s
+        run: |
+          kubectl set image deployment/backend backend=${{ needs.build.outputs.image_sha }}
+          kubectl rollout status deployment/backend --timeout=120s
 
   notify:
     if: always()
