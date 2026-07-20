@@ -18,7 +18,7 @@ export class HealthController {
 
   @Get('ready')
   getReady() {
-    if (this.readinessService.isReady()) {
+    if (!this.readinessService.isReady()) {
       throw new HttpException(
         'Service is not ready',
         HttpStatus.SERVICE_UNAVAILABLE,
