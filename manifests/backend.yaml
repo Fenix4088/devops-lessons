@@ -26,8 +26,32 @@ spec:
             memory: "240Mi"
         ports:
           - containerPort: 3005
+
         envFrom:
           - configMapRef:
               name: backend-config
           - secretRef:
               name: backend-secret
+
+        startupProbe:
+          httpGet:
+            path: /api/health
+            port: 3005
+          failureThreshold: 12    # 12 × 5 сек = 1 минута на старт
+          timeoutSeconds: 3
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3005
+          initialDelaySeconds: 0
+          periodSeconds: 15
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /api/health/ready
+            port: 3005
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          failureThreshold: 3
+        

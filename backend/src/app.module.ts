@@ -4,11 +4,12 @@ import { AppService } from './app.service';
 import { HealthController } from './health.controller';
 import { MetricsModule } from './metrics.module';
 import { MetricsMiddleware } from './metrics/metrics.middleware';
+import { ReadinessService } from './readiness.service';
 
 @Module({
   imports: [MetricsModule],
   controllers: [AppController, HealthController],
-  providers: [AppService],
+  providers: [AppService, ReadinessService],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {

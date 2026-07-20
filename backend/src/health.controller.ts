@@ -1,8 +1,11 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, HttpException, HttpStatus } from '@nestjs/common';
 import { pool } from './db';
+import { ReadinessService } from './readiness.service';
 
 @Controller('api/health')
 export class HealthController {
+  constructor(private readonly readinessService: ReadinessService) {}
+
   @Get()
   async getHealth() {
     try {
@@ -11,5 +14,17 @@ export class HealthController {
     } catch {
       return { status: 'degraded', db: 'down' };
     }
+  }
+
+  @Get('ready')
+  getReady() {
+    if (this.readinessService.isReady()) {
+      throw new HttpException(
+        'Service is not ready',
+        HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+
+    return { status: 'ready' };
   }
 }
