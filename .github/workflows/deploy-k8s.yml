@@ -71,7 +71,7 @@ jobs:
   
       - name: Deploy with Helm
         env:
-          IMAGE_TAG: ${{ needs.build.outputs.image_sha }}
+          IMAGE_TAG: ${{ vars.DOCKER_USER }}/lessons-todo-back:${{ needs.build.outputs.image_sha }}
         run: |
           helm upgrade backend-api ./helm/backend-api \
             --reuse-values \
