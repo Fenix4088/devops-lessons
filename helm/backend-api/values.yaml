@@ -1,0 +1,36 @@
+image:
+  # name: fenix4088/lessons-todo-back:sha-0f597487d7c3f1ddf3ce44bf31172a1c214846ee
+  name: fenix4088/lessons-todo-back:latest
+  pullSecret: dockerhub-cred
+ 
+backend:
+  port: 3000
+ 
+resources:
+  requests:
+    cpu: "60m"
+    memory: "100Mi"
+  limits:
+    cpu: "100m"
+    memory: "120Mi"
+ 
+config:
+  NODE_ENV: "production"
+
+secret:
+  dbHost: "postgres"
+  dbPort: "5432"
+  dbUser: "admin"
+  dbPassword: "supersecret"
+  dbName: "shop"
+ 
+ingress:
+  host: api.plikap.com
+  tlsSecret: backend-api-tls
+  clusterIssuer: letsencrypt-prod
+ 
+hpa:
+  minReplicas: 1
+  maxReplicas: 5
+  cpuUtilization: 70
+  memoryUtilization: 80
