@@ -14,6 +14,7 @@ jobs:
     outputs:
     # експортируем переменную
       image_sha: ${{ steps.build-push.outputs.image_sha }}
+      backend_image: ${{ steps.build-push.outputs.backend_image }}
     steps:
       - uses: actions/checkout@v4
       - name: Login to DockerHub
@@ -43,6 +44,8 @@ jobs:
           docker push ${{ vars.DOCKER_USER }}/lessons-todo-back:${IMAGE_LATEST}
           # Передаём SHA образов в output, чтобы не дублировать в deploy
           echo "image_sha=$IMAGE_SHA" >> "$GITHUB_OUTPUT"
+          # Полное имя образа с тегом — его ждёт deploy-argocd
+          echo "backend_image=${{ vars.DOCKER_USER }}/lessons-todo-back:${IMAGE_SHA}" >> "$GITHUB_OUTPUT"
 
 
   # deploy:
@@ -84,9 +87,9 @@ jobs:
     uses: ./.github/workflows/deploy-argocd.yml
     with:
       helm_path: helm-charts/backend-api/values-production.yaml
-      image_name: ${{ needs.build.outputs.image_sha }}
+      image_name: ${{ needs.build.outputs.backend_image }}
       branch: main
-      gitops_repo: fenix4088/argocd-devops.git
+      gitops_repo: fenix4088/argocd-devops
       argocd_app_name: backend-api
       argocd_server: ${{ vars.ARGOCD_SERVER }}
     secrets:
