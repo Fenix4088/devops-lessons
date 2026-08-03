@@ -13,6 +13,7 @@ RUN npm prune --omit=dev
 
 # ---------- runner ----------
 FROM node:20-alpine AS runner
+USER node
 WORKDIR /app
 
 # Скомпилированный артефакт из builder
