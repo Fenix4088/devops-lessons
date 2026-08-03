@@ -50,6 +50,7 @@ jobs:
             --exclude=workflows \
             --exclude=deployment \
             --exclude=helm \
+            --exclude=k8s \
             --exclude=manifests \
             --exclude=argocd \
             --exclude=dist \
