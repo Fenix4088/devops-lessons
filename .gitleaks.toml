@@ -2,3 +2,7 @@ title = "gitleaks config"
  
 [extend]
 useDefault = true
+
+[[allowlists]]
+description = "ArgoCD deploy key - lesson artefact, key revoked"
+paths = ['''argocd/argocd-deploy-key''']
