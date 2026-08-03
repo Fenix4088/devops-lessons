@@ -6,3 +6,7 @@ useDefault = true
 [[allowlists]]
 description = "ArgoCD deploy key - lesson artefact, key revoked"
 paths = ['''argocd/argocd-deploy-key''']
+
+[[allowlists]]
+description = "Test docker secret"
+paths = ['''manifests/docker-secret\.yaml''']
