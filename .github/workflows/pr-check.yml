@@ -30,6 +30,10 @@ jobs:
       - name: Run lint
         working-directory: backend
         run: npm run lint
+
+  security-scan:
+    name: "Security scan"
+    uses: ./.github/workflows/sast-sca.yaml
   
   test:
     runs-on: ubuntu-latest
